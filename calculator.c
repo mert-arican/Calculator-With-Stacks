@@ -40,8 +40,6 @@ int getPrecedence(int operator) {
 }
 
 void subroutine(void) {
-    // Pops the last two integers from operandStack, pops the operation from operationStack,
-    // then performs the operation and pushes the result to operandStack.
     push(&operandStack, performOperation(pop(&operatorStack), pop(&operandStack), pop(&operandStack)));
 }
 
@@ -49,32 +47,19 @@ int calculate(char *expression, unsigned long length) {
     for (int i = 0; i < length; i++) {
         int c = expression[i];
         if (isdigit(c)) {
-            // If c is a digit, then read the operand with 'getOperandFromExpression' function.
-            // This function mutates the i value. --- i becomes the integer's last digit's index.
             push(&operandStack, getOperandFromExpression(expression, &i));
-        }
-        // If c is a operator...
-        else if (c == '(') {
-            // if c is '(' then push it to the stack.
+        } else if (c == '(') {
             push(&operatorStack, c);
         } else if (c == ')') {
-            // if c is ')' then, until top of the operatorStack is '(' perform subroutine. Then pop '('.
             while (top(&operatorStack) != '(') { subroutine(); }
             pop(&operatorStack);
-        }
-        // If c is arithmetic operator...
-        else if (operatorStack.count == 0 || top(&operatorStack) == '(' || getPrecedence(top(&operatorStack)) < getPrecedence(c)) {
-            // if operatorStack is empty, or top operator is '(', or the precedence of the top operator is less than the precedence
-            // of the c, push c to the operatorStack.
+        } else if (operatorStack.count == 0 || top(&operatorStack) == '(' || getPrecedence(top(&operatorStack)) < getPrecedence(c)) {
             push(&operatorStack, c);
         } else if (getPrecedence(top(&operatorStack)) >= getPrecedence(c)) {
-            // if precedence of the top operator is bigger than or equal to the precedence of c,then until top operator's precedence
-            // is less than the precedence of c, perform subroutine. Then push c to the stack.
             while (getPrecedence(top(&operatorStack)) >= getPrecedence(c)) { subroutine(); }
             push(&operatorStack, c);
         }
     }
-    // until all of the operators are popped, i.e. used, perform subroutine.
     while (operatorStack.count > 0) { subroutine(); }
     return top(&operandStack);
 }
